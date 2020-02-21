@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CFBS.Feedback.API.REST", "CFBS.APIs\CFBS.Feedback.API.REST.csproj", "{7BD5D648-96EA-4DEC-BF8F-2CB84377DAD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CFBS.Feedback.API.REST", "CFBS\CFBS.Feedback.API.REST.csproj", "{7BD5D648-96EA-4DEC-BF8F-2CB84377DAD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
