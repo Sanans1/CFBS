@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CFBS.Feedback.API.REST", "CFBS\CFBS.Feedback.API.REST.csproj", "{7BD5D648-96EA-4DEC-BF8F-2CB84377DAD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CFBS.Feedback.API.REST", "CFBS.Feedback.API.REST\CFBS.Feedback.API.REST.csproj", "{7BD5D648-96EA-4DEC-BF8F-2CB84377DAD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CFBS.Feedback.DAL", "CFBS.Feedback.DAL\CFBS.Feedback.DAL.csproj", "{9F655FB3-95C4-44D5-929D-19085DF638A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CFBS.Feedback.DAL", "CFBS.Feedback.DAL\CFBS.Feedback.DAL.csproj", "{9F655FB3-95C4-44D5-929D-19085DF638A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CFBS.Common.Repository", "CFBS.Common.Repository\CFBS.Common.Repository.csproj", "{A1986BDC-C74B-4A94-AE41-D57ADA757892}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{9F655FB3-95C4-44D5-929D-19085DF638A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F655FB3-95C4-44D5-929D-19085DF638A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F655FB3-95C4-44D5-929D-19085DF638A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1986BDC-C74B-4A94-AE41-D57ADA757892}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1986BDC-C74B-4A94-AE41-D57ADA757892}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1986BDC-C74B-4A94-AE41-D57ADA757892}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1986BDC-C74B-4A94-AE41-D57ADA757892}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
