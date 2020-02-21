@@ -12,7 +12,7 @@ namespace CFBS.Common.Repository
 {
     public class GenericRepository<TContext, TEntity, TDTO> : IGenericRepository<TEntity, TDTO> 
                                                             where TContext : DbContext 
-                                                            where TEntity : Entity
+                                                            where TEntity : class
                                                             where TDTO : class
     {
         private readonly TContext _context;
@@ -59,8 +59,6 @@ namespace CFBS.Common.Repository
 
             TEntity entity = _mapper.Map<TEntity>(dto);
 
-            entity.ID = null;
-
             await _dbSet.AddAsync(entity);
 
             await _context.SaveChangesAsync();
@@ -101,7 +99,10 @@ namespace CFBS.Common.Repository
 
         public async Task<bool> EntityExists(int id)
         {
-            return await _dbSet.AsNoTracking().AnyAsync(entity => entity.ID == id);
+            TEntity entity = await _dbSet.FindAsync(id);
+
+            return entity != null;
+            //_context.Entry(entity).State = EntityState.Detached;
         }
     }
 }
