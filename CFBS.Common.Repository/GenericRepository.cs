@@ -81,7 +81,7 @@ namespace CFBS.Common.Repository
 
             if (entityToDelete == null) throw new ArgumentException(nameof(id));
 
-            _context.Update(entityToDelete);
+            _context.Remove(entityToDelete);
 
             await _context.SaveChangesAsync();
         }
