@@ -8,5 +8,7 @@ namespace CFBS.Feedback.DAL.Entities
     {
         public int AnswerID;
         public string Text;
+
+        public Answer Answer;
     }
 }

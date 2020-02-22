@@ -11,5 +11,8 @@ namespace CFBS.Feedback.DAL.Entities
         public int LocationID;
         public int FeedbackSessionNumber;
         public DateTime CreatedAt;
+
+        public Answer Answer;
+        public Location Location;
     }
 }

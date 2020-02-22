@@ -9,5 +9,6 @@ namespace CFBS.Feedback.DAL.Entities
         public int? ID;
         public string ImageName;
         public string ImagePath;
+        public DateTime CreatedAt;
     }
 }

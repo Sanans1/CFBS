@@ -9,5 +9,8 @@ namespace CFBS.Feedback.DAL.Entities
         public int AnswerID;
         public int ImageID;
         public string Text;
+
+        public Answer Answer;
+        public Image Image;
     }
 }

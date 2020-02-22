@@ -11,5 +11,7 @@ namespace CFBS.Feedback.DAL.Entities
         public int QuestionID;
         public AnswerType AnswerType;
         public DateTime CreatedAt;
+
+        public Question Question;
     }
 }

@@ -9,5 +9,8 @@ namespace CFBS.Feedback.DAL.Entities
         public int QuestionID;
         public int LocationID;
         public DateTime CreatedAt;
+
+        public Question Question;
+        public Location Location;
     }
 }
