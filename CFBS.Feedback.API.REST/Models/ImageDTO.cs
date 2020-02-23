@@ -4,11 +4,11 @@ using System.Text;
 
 namespace CFBS.Feedback.DAL.Entities
 {
-    public class Image
+    public class ImageDTO
     {
         public int? ID;
-        public string Name;
-        public string Path;
+        public string ImageName;
+        public string ImagePath;
         public DateTime CreatedAt;
     }
 }

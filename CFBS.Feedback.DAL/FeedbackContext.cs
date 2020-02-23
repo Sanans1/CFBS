@@ -42,8 +42,8 @@ namespace CFBS.Feedback.DAL
                 questionEntities.Property(question => question.ID).ValueGeneratedOnAdd();
 
                 questionEntities.Property(question => question.Text).IsRequired();
-                questionEntities.Property(question => question.FeedbackType).IsRequired();
-                questionEntities.Property(question => question.AnswerType).IsRequired();
+                questionEntities.Property(question => question.FeedbackType).IsRequired().HasConversion<string>();
+                questionEntities.Property(question => question.AnswerType).IsRequired().HasConversion<string>();
                 questionEntities.Property(question => question.CreatedAt).IsRequired();
             });
 
@@ -73,8 +73,8 @@ namespace CFBS.Feedback.DAL
                 imageEntities.HasKey(image => image.ID);
                 imageEntities.Property(image => image.ID).ValueGeneratedOnAdd();
 
-                imageEntities.Property(image => image.ImageName).IsRequired();
-                imageEntities.Property(image => image.ImagePath).IsRequired();
+                imageEntities.Property(image => image.Name).IsRequired();
+                imageEntities.Property(image => image.Path).IsRequired();
                 imageEntities.Property(image => image.CreatedAt).IsRequired();
             });
 
@@ -87,7 +87,7 @@ namespace CFBS.Feedback.DAL
                               .WithMany()
                               .HasForeignKey(answer => answer.QuestionID);
 
-                answerEntities.Property(answer => answer.AnswerType).IsRequired();
+                answerEntities.Property(answer => answer.AnswerType).IsRequired().HasConversion<string>();
                 answerEntities.Property(answer => answer.CreatedAt).IsRequired();
             });
 
