@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace CFBS.Feedback.DAL.Entities
+namespace CFBS.Feedback.API.REST.Models
 {
     public class LocationDTO
     {

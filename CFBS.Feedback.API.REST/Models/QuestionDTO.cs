@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using CFBS.Feedback.DAL.Enums;
 
-namespace CFBS.Feedback.DAL.Entities
+namespace CFBS.Feedback.API.REST.Models
 {
     public class QuestionDTO
     {

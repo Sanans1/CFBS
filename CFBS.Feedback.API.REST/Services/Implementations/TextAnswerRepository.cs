@@ -10,7 +10,7 @@ using CFBS.Feedback.DAL.Entities;
 
 namespace CFBS.Feedback.API.REST.Services.Implementations
 {
-    public class TextAnswerRepository : GenericRepository<FeedbackContext, TextAnswer, AnswerDTO<AnswerDetailsDTO>>
+    public class TextAnswerRepository : GenericRepository<FeedbackContext, TextAnswer, AnswerDetailsDTO>
     {
         public TextAnswerRepository(FeedbackContext context, IMapper mapper) : base(context, mapper)
         {
