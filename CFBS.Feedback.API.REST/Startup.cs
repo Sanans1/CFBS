@@ -36,7 +36,8 @@ namespace CFBS.Feedback.API.REST
             services.AddScoped<ImageRepository>();
             services.AddScoped<LocationRepository>();
             services.AddScoped<QuestionRepository>();
-            services.AddScoped<SubmittedAnswerRepository>();
+            services.AddScoped<SubmittedImageAnswerRepository>();
+            services.AddScoped<SubmittedTextAnswerRepository>();
             services.AddScoped<TextAnswerRepository>();
 
             services.AddSwaggerGen(options =>

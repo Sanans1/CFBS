@@ -5,8 +5,8 @@ namespace CFBS.Feedback.API.REST.Models
     public class ImageDTO
     {
         public int? ID;
-        public string ImageName;
-        public string ImagePath;
+        public string Name;
+        public string Path;
         public DateTime CreatedAt;
     }
 }

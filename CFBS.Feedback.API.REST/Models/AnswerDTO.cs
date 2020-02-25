@@ -12,6 +12,7 @@ namespace CFBS.Feedback.API.REST.Models
         public int QuestionID;
         public AnswerType AnswerType;
         public DateTime CreatedAt;
+
         public TAnswerDetails AnswerDetails;
     }
 }

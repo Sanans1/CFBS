@@ -10,9 +10,9 @@ using CFBS.Feedback.DAL.Entities;
 
 namespace CFBS.Feedback.API.REST.Services.Implementations
 {
-    public class SubmittedAnswerRepository : GenericRepository<FeedbackContext, SubmittedAnswer, SubmittedAnswerDTO>
+    public class SubmittedImageAnswerRepository : GenericRepository<FeedbackContext, SubmittedAnswer, SubmittedAnswerDTO<ImageAnswerDetailsDTO>>
     {
-        public SubmittedAnswerRepository(FeedbackContext context, IMapper mapper) : base(context, mapper)
+        public SubmittedImageAnswerRepository(FeedbackContext context, IMapper mapper) : base(context, mapper)
         {
         }
     }
