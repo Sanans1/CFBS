@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using CFBS.Feedback.API.REST.Models;
 using CFBS.Feedback.API.REST.Services.Implementations;
+using CFBS.Feedback.DAL.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,16 +17,14 @@ namespace CFBS.Feedback.API.REST.Controllers
     public class ImageAnswerController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly AnswerRepository<ImageAnswerDetailsDTO> _AnswerRepository;
-        private readonly ImageAnswerRepository _imageAnswerRepository;
+        private readonly AnswerRepository<ImageAnswerDetailsDTO> _answerRepository;
         private readonly SubmittedImageAnswerRepository _submittedImageAnswerRepository;
 
         public ImageAnswerController(IMapper mapper, AnswerRepository<ImageAnswerDetailsDTO> answerRepository, 
-            ImageAnswerRepository imageAnswerRepository, SubmittedImageAnswerRepository submittedImageAnswerRepository)
+            SubmittedImageAnswerRepository submittedImageAnswerRepository)
         {
             _mapper = mapper;
-            _AnswerRepository = answerRepository;
-            _imageAnswerRepository = imageAnswerRepository;
+            _answerRepository = answerRepository;
             _submittedImageAnswerRepository = submittedImageAnswerRepository;
         }
 
@@ -33,22 +32,22 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AnswerDTO<ImageAnswerDetailsDTO>>>> Get()
         {
-            return Ok(await _AnswerRepository.Get());
+            return Ok(await _answerRepository.Get(filter: answer => answer.AnswerType == AnswerType.Image));
         }
 
-        // GET: api/submitted/ImageAnswer
-        [HttpGet]
-        [Route("Submitted")]
-        public async Task<ActionResult<IEnumerable<AnswerDTO<ImageAnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
+        // GET: api/ImageAnswer/Submitted
+        [HttpGet("Submitted")]
+        public async Task<ActionResult<IEnumerable<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
         {
-            return Ok((await _submittedImageAnswerRepository.Get(filter: submittedAnswer => locationID.HasValue || submittedAnswer.LocationID == locationID)).Select(submittedAnswer => submittedAnswer.Answer));
+            return Ok(await _submittedImageAnswerRepository.Get(filter: submittedAnswer => (locationID.HasValue || submittedAnswer.LocationID == locationID) && 
+                                                                                            submittedAnswer.Answer.AnswerType == AnswerType.Image));
         }
 
         // GET: api/ImageAnswer/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<AnswerDTO<ImageAnswerDetailsDTO>>> Get(int id)
         {
-            AnswerDTO<ImageAnswerDetailsDTO> answerDTO = await _AnswerRepository.GetByID(id);
+            AnswerDTO<ImageAnswerDetailsDTO> answerDTO = await _answerRepository.GetByID(id);
 
             if (answerDTO == null)
             {
@@ -58,12 +57,11 @@ namespace CFBS.Feedback.API.REST.Controllers
             return Ok(answerDTO);
         }
 
-        // GET: api/submitted/ImageAnswer/5
-        [HttpGet("{id}", Name = "Get")]
-        [Route("Submitted")]
-        public async Task<ActionResult<AnswerDTO<ImageAnswerDetailsDTO>>> GetSubmitted(int id)
+        // GET: api/ImageAnswer/Submitted/5
+        [HttpGet("Submitted/{id}")]
+        public async Task<ActionResult<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>> GetSubmitted(int id)
         {
-            AnswerDTO<ImageAnswerDetailsDTO> answerDTO = (await _submittedImageAnswerRepository.GetByID(id)).Answer;
+            SubmittedAnswerDTO<ImageAnswerDetailsDTO> answerDTO = await _submittedImageAnswerRepository.GetByID(id);
 
             if (answerDTO == null)
             {
@@ -77,20 +75,19 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost]
         public async Task<ActionResult<AnswerDTO<ImageAnswerDetailsDTO>>> Post(AnswerDTO<ImageAnswerDetailsDTO> answerDTO)
         {
-            AnswerDTO<ImageAnswerDetailsDTO> answerDTOCreated = await _AnswerRepository.Create(answerDTO);
+            AnswerDTO<ImageAnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
 
             return CreatedAtAction("Get", new { id = answerDTOCreated.ID }, answerDTOCreated);
         }
 
 
-        // POST: api/ImageAnswer
-        [HttpPost]
-        [Route("Submitted")]
-        public async Task<ActionResult<AnswerDTO<ImageAnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<ImageAnswerDetailsDTO> answerDTO)
+        // POST: api/ImageAnswer/Submitted
+        [HttpPost("Submitted")]
+        public async Task<ActionResult<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTO)
         {
-            answerDTO = await _submittedImageAnswerRepository.Create(answerDTO);
+            submittedAnswerDTO = await _submittedImageAnswerRepository.Create(submittedAnswerDTO);
 
-            return CreatedAtAction("GetSubmitted", new { id = answerDTO.ID }, answerDTO);
+            return CreatedAtAction("GetSubmitted", new { id = submittedAnswerDTO.ID }, submittedAnswerDTO);
         }
 
         // PUT: api/ImageAnswer/5
@@ -105,12 +102,13 @@ namespace CFBS.Feedback.API.REST.Controllers
             try
             {
                 //TODO Check for duplicate images
+                //TODO perhaps make it so this can only have an image ID
 
-                await _AnswerRepository.Update(id, answerDTO);
+                await _answerRepository.Update(id, answerDTO);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _AnswerRepository.EntityExists(id))
+                if (!await _answerRepository.EntityExists(id))
                 {
                     return NotFound();
                 }
@@ -121,21 +119,18 @@ namespace CFBS.Feedback.API.REST.Controllers
             return NoContent();
         }
 
-        // PUT: api/ImageAnswer/5
-        [HttpPut("{id}")]
-        [Route("Submitted")]
-        public async Task<IActionResult> PutSubmitted(int id, SubmittedAnswerDTO<ImageAnswerDetailsDTO> answerDTO)
+        // PUT: api/ImageAnswer/Submitted/5
+        [HttpPut("Submitted/{id}")]
+        public async Task<IActionResult> PutSubmitted(int id, SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTO)
         {
-            if (id != answerDTO.ID)
+            if (id != submittedAnswerDTO.ID)
             {
                 return BadRequest();
             }
 
             try
             {
-                SubmittedAnswerDTO<ImageAnswerDetailsDTO> oldAnswerDTO = await _submittedImageAnswerRepository.GetByID(id);
-
-                await _submittedImageAnswerRepository.Update(id, answerDTO);
+                await _submittedImageAnswerRepository.Update(id, submittedAnswerDTO);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -154,19 +149,18 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (!await _AnswerRepository.EntityExists(id))
+            if (!await _answerRepository.EntityExists(id))
             {
                 return NotFound();
             }
 
-            await _AnswerRepository.Delete(id);
+            await _answerRepository.Delete(id);
 
             return NoContent();
         }
 
-        // DELETE: api/ImageAnswer/5
-        [HttpDelete("{id}")]
-        [Route("Submitted")]
+        // DELETE: api/ImageAnswer/Submitted/5
+        [HttpDelete("Submitted/{id}")]
         public async Task<IActionResult> DeleteSubmitted(int id)
         {
             if (!await _submittedImageAnswerRepository.EntityExists(id))

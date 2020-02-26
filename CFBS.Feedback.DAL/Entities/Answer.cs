@@ -7,11 +7,11 @@ namespace CFBS.Feedback.DAL.Entities
 {
     public class Answer
     {
-        public int? ID;
-        public int QuestionID;
-        public AnswerType AnswerType;
-        public DateTime CreatedAt;
+        public int? ID { get; set; }
+        public int QuestionID { get; set; }
+        public AnswerType AnswerType { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-        public Question Question;
+        public virtual Question Question { get; set; }
     }
 }

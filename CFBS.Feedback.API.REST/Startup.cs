@@ -1,9 +1,12 @@
+using System;
 using AutoMapper;
 using CFBS.Feedback.API.REST.Models;
 using CFBS.Feedback.API.REST.Services.Implementations;
+using CFBS.Feedback.DAL;
 using CFBS.Feedback.DAL.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,12 +16,14 @@ namespace CFBS.Feedback.API.REST
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            Environment = environment;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -27,7 +32,16 @@ namespace CFBS.Feedback.API.REST
 
             services.AddAutoMapper(typeof(Startup));
 
-            //TODO Add db stuff
+            if (Environment.IsDevelopment())
+            {
+                services.AddDbContext<FeedbackContext>(options => options.UseLazyLoadingProxies()
+                    .UseInMemoryDatabase("Feedback"));
+            }
+            else
+            {
+                //services.AddDbContext<FeedbackContext>(options => options.UseLazyLoadingProxies()
+                //    .UseSqlServer(Configuration.GetConnectionString("ProductDatabase")));
+            }
 
             services.AddScoped<ActiveQuestionRepository>();
             services.AddScoped<AnswerRepository<ImageAnswerDetailsDTO>>();
@@ -60,20 +74,17 @@ namespace CFBS.Feedback.API.REST
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-
-            app.UseSwagger(options =>
-            {
-                options.RouteTemplate = "swagger/{documentName}/swagger.json";
-            });
+            app.UseSwagger();
 
             app.UseSwaggerUI(options =>
             {
-                options.RoutePrefix = "swagger";
-                options.SwaggerEndpoint("v1/swagger.json", "Feedback REST API");
+                options.RoutePrefix = string.Empty;
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Feedback REST API");
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
             });
         }
     }

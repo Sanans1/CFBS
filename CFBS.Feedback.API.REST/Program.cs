@@ -1,5 +1,10 @@
+using System;
+using CFBS.Feedback.DAL;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace CFBS.Feedback.API.REST
 {
@@ -7,7 +12,33 @@ namespace CFBS.Feedback.API.REST
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            IHost host = CreateHostBuilder(args).Build();
+
+            using (IServiceScope scope = host.Services.CreateScope())
+            {
+                IServiceProvider services = scope.ServiceProvider;
+                FeedbackContext context = services.GetRequiredService<FeedbackContext>();
+
+                IWebHostEnvironment env = services.GetRequiredService<IWebHostEnvironment>();
+                if (env.IsDevelopment())
+                {
+                    try
+                    {
+                       //TODO Add seeding method
+                    }
+                    catch (Exception)
+                    {
+                        ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+                        logger.LogDebug("Seeding test data failed.");
+                    }
+                }
+                else
+                {
+                    context.Database.Migrate();
+                }
+            }
+
+            host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -18,3 +49,4 @@ namespace CFBS.Feedback.API.REST
                 });
     }
 }
+

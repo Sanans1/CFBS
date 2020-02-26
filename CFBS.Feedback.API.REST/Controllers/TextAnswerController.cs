@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using CFBS.Feedback.API.REST.Models;
 using CFBS.Feedback.API.REST.Services.Implementations;
+using CFBS.Feedback.DAL.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,15 +18,13 @@ namespace CFBS.Feedback.API.REST.Controllers
     {
         private readonly IMapper _mapper;
         private readonly AnswerRepository<AnswerDetailsDTO> _AnswerRepository;
-        private readonly TextAnswerRepository _textAnswerRepository;
         private readonly SubmittedTextAnswerRepository _submittedTextAnswerRepository;
 
         public TextAnswerController(IMapper mapper, AnswerRepository<AnswerDetailsDTO> answerRepository,
-            TextAnswerRepository textAnswerRepository, SubmittedTextAnswerRepository submittedTextAnswerRepository)
+            SubmittedTextAnswerRepository submittedTextAnswerRepository)
         {
             _mapper = mapper;
             _AnswerRepository = answerRepository;
-            _textAnswerRepository = textAnswerRepository;
             _submittedTextAnswerRepository = submittedTextAnswerRepository;
         }
 
@@ -34,19 +33,19 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AnswerDTO<AnswerDetailsDTO>>>> Get()
         {
-            return Ok(await _AnswerRepository.Get());
+            return Ok(await _AnswerRepository.Get(filter: answer => answer.AnswerType == AnswerType.Text));
         }
 
-        // GET: api/submitted/TextAnswer
-        [HttpGet]
-        [Route("Submitted")]
-        public async Task<ActionResult<IEnumerable<AnswerDTO<AnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
+        // GET: api/TextAnswer/Submitted
+        [HttpGet("Submitted")]
+        public async Task<ActionResult<IEnumerable<SubmittedAnswerDTO<AnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
         {
-            return Ok((await _submittedTextAnswerRepository.Get(filter: submittedAnswer => locationID.HasValue || submittedAnswer.LocationID == locationID)).Select(submittedAnswer => submittedAnswer.Answer));
+            return Ok(await _submittedTextAnswerRepository.Get(filter: submittedAnswer => (locationID.HasValue || submittedAnswer.LocationID == locationID) && 
+                                                                                           submittedAnswer.Answer.AnswerType == AnswerType.Text));
         }
 
         // GET: api/TextAnswer/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<AnswerDTO<AnswerDetailsDTO>>> Get(int id)
         {
             AnswerDTO<AnswerDetailsDTO> answerDTO = await _AnswerRepository.GetByID(id);
@@ -59,19 +58,18 @@ namespace CFBS.Feedback.API.REST.Controllers
             return Ok(answerDTO);
         }
 
-        // GET: api/submitted/TextAnswer/5
-        [HttpGet("{id}", Name = "Get")]
-        [Route("Submitted")]
-        public async Task<ActionResult<AnswerDTO<AnswerDetailsDTO>>> GetSubmitted(int id)
+        // GET: api/TextAnswer/Submitted/5
+        [HttpGet("Submitted/{id}")]
+        public async Task<ActionResult<SubmittedAnswerDTO<AnswerDetailsDTO>>> GetSubmitted(int id)
         {
-            AnswerDTO<AnswerDetailsDTO> answerDTO = (await _submittedTextAnswerRepository.GetByID(id)).Answer;
+            SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO = await _submittedTextAnswerRepository.GetByID(id);
 
-            if (answerDTO == null)
+            if (submittedAnswerDTO == null)
             {
                 return NotFound();
             }
 
-            return Ok(answerDTO);
+            return Ok(submittedAnswerDTO);
         }
 
         // POST: api/TextAnswer
@@ -84,14 +82,13 @@ namespace CFBS.Feedback.API.REST.Controllers
         }
 
 
-        // POST: api/TextAnswer
-        [HttpPost]
-        [Route("Submitted")]
-        public async Task<ActionResult<AnswerDTO<AnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<AnswerDetailsDTO> answerDTO)
+        // POST: api/TextAnswer/Submitted
+        [HttpPost("Submitted")]
+        public async Task<ActionResult<SubmittedAnswerDTO<AnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO)
         {
-            answerDTO = await _submittedTextAnswerRepository.Create(answerDTO);
+            submittedAnswerDTO = await _submittedTextAnswerRepository.Create(submittedAnswerDTO);
 
-            return CreatedAtAction("GetSubmitted", new { id = answerDTO.ID }, answerDTO);
+            return CreatedAtAction("GetSubmitted", new { id = submittedAnswerDTO.ID }, submittedAnswerDTO);
         }
 
         // PUT: api/TextAnswer/5
@@ -105,7 +102,7 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             try
             {
-                AnswerDTO<AnswerDetailsDTO> oldAnswerDTO = await _AnswerRepository.GetByID(id);
+                //TODO Check for duplicate images
 
                 await _AnswerRepository.Update(id, answerDTO);
             }
@@ -122,19 +119,18 @@ namespace CFBS.Feedback.API.REST.Controllers
             return NoContent();
         }
 
-        // PUT: api/TextAnswer/5
-        [HttpPut("{id}")]
-        [Route("Submitted")]
-        public async Task<IActionResult> PutSubmitted(int id, SubmittedAnswerDTO<AnswerDetailsDTO> answerDTO)
+        // PUT: api/TextAnswer/Submitted/5
+        [HttpPut("Submitted/{id}")]
+        public async Task<IActionResult> PutSubmitted(int id, SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO)
         {
-            if (id != answerDTO.ID)
+            if (id != submittedAnswerDTO.ID)
             {
                 return BadRequest();
             }
 
             try
             {
-                await _submittedTextAnswerRepository.Update(id, answerDTO);
+                await _submittedTextAnswerRepository.Update(id, submittedAnswerDTO);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -163,9 +159,8 @@ namespace CFBS.Feedback.API.REST.Controllers
             return NoContent();
         }
 
-        // DELETE: api/TextAnswer/5
-        [HttpDelete("{id}")]
-        [Route("Submitted")]
+        // DELETE: api/TextAnswer/Submitted/5
+        [HttpDelete("Submitted/{id}")]
         public async Task<IActionResult> DeleteSubmitted(int id)
         {
             if (!await _submittedTextAnswerRepository.EntityExists(id))

@@ -32,7 +32,7 @@ namespace CFBS.Feedback.API.REST.Controllers
         }
 
         // GET: api/Image/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<LocationDTO>> Get(int id)
         {
             LocationDTO location = await _locationRepository.GetByID(id);

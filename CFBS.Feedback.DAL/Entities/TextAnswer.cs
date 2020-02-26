@@ -6,9 +6,9 @@ namespace CFBS.Feedback.DAL.Entities
 {
     public class TextAnswer
     {
-        public int AnswerID;
-        public string Text;
+        public int AnswerID { get; set; }
+        public string Text { get; set; }
 
-        public Answer Answer;
+        public virtual Answer Answer { get; set; }
     }
 }

@@ -6,13 +6,13 @@ namespace CFBS.Feedback.DAL.Entities
 {
     public class SubmittedAnswer
     {
-        public int? ID;
-        public int AnswerID;
-        public int LocationID;
-        public int FeedbackSessionNumber;
-        public DateTime CreatedAt;
+        public int? ID { get; set; }
+        public int AnswerID { get; set; }
+        public int LocationID { get; set; }
+        public int FeedbackSessionNumber { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-        public Answer Answer;
-        public Location Location;
+        public virtual Answer Answer { get; set; }
+        public virtual Location Location { get; set; }
     }
 }

@@ -8,11 +8,11 @@ namespace CFBS.Feedback.API.REST.Models
 {
     public class AnswerDTO<TAnswerDetails>
     {
-        public int? ID;
-        public int QuestionID;
-        public AnswerType AnswerType;
-        public DateTime CreatedAt;
+        public int? ID { get; set; }
+        public int QuestionID { get; set; }
+        public AnswerType AnswerType { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-        public TAnswerDetails AnswerDetails;
+        public TAnswerDetails AnswerDetails { get; set; }
     }
 }

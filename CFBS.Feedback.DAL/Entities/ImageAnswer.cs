@@ -6,11 +6,11 @@ namespace CFBS.Feedback.DAL.Entities
 {
     public class ImageAnswer
     {
-        public int AnswerID;
-        public int ImageID;
-        public string Text;
+        public int AnswerID { get; set; }
+        public int ImageID { get; set; }
+        public string Text { get; set; }
 
-        public Answer Answer;
-        public Image Image;
+        public virtual Answer Answer { get; set; }
+        public virtual Image Image { get; set; }
     }
 }

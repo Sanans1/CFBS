@@ -2,6 +2,6 @@
 {
     public class AnswerDetailsDTO
     {
-        public string Text;
+        public string Text { get; set; }
     }
 }

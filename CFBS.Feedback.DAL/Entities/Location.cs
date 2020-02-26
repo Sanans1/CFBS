@@ -6,8 +6,8 @@ namespace CFBS.Feedback.DAL.Entities
 {
     public class Location
     {
-        public int? ID;
-        public string Name;
-        public DateTime CreatedAt;
+        public int? ID { get; set; }
+        public string Name { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -58,14 +58,14 @@ namespace CFBS.Feedback.DAL
 
             modelBuilder.Entity<ActiveQuestion>(activeQuestionEntities =>
             {
+                activeQuestionEntities.HasKey(activeQuestion => new { activeQuestion.LocationID, activeQuestion.QuestionID });
+
                 activeQuestionEntities.HasOne(activeQuestion => activeQuestion.Question)
                                       .WithMany()
                                       .HasForeignKey(activeQuestion => activeQuestion.QuestionID);
                 activeQuestionEntities.HasOne(activeQuestion => activeQuestion.Location)
                                       .WithMany()
                                       .HasForeignKey(activeQuestion => activeQuestion.LocationID);
-
-                activeQuestionEntities.Property(activeQuestion => activeQuestion.CreatedAt).IsRequired();
             });
 
             modelBuilder.Entity<Image>(imageEntities =>
@@ -93,6 +93,8 @@ namespace CFBS.Feedback.DAL
 
             modelBuilder.Entity<ImageAnswer>(imageAnswerEntities =>
             {
+                imageAnswerEntities.HasNoKey();
+
                 imageAnswerEntities.HasOne(imageAnswer => imageAnswer.Answer)
                                    .WithOne()
                                    .HasForeignKey<ImageAnswer>(imageAnswer => imageAnswer.AnswerID);
@@ -105,6 +107,8 @@ namespace CFBS.Feedback.DAL
 
             modelBuilder.Entity<TextAnswer>(textAnswerEntities =>
             {
+                textAnswerEntities.HasNoKey();
+
                 textAnswerEntities.HasOne(textAnswer => textAnswer.Answer)
                     .WithOne()
                     .HasForeignKey<TextAnswer>(textAnswer => textAnswer.AnswerID);
