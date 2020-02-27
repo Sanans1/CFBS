@@ -44,8 +44,10 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpGet("Submitted")]
         public async Task<ActionResult<IEnumerable<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
         {
-            return Ok(await _submittedImageAnswerRepository.Get(filter: submittedAnswer => (locationID.HasValue || submittedAnswer.LocationID == locationID) && 
-                                                                                            submittedAnswer.Answer.AnswerType == AnswerType.Image));
+            SubmittedAnswerDTO<ImageAnswerDetailsDTO>[] answerDTOs = (await _submittedImageAnswerRepository.Get(filter: submittedAnswer => (locationID.HasValue || submittedAnswer.LocationID == locationID) &&
+                                                                                                                                           submittedAnswer.Answer.AnswerType == AnswerType.Image)).ToArray();
+
+            return Ok(await SubmittedImageAnswerToSubmittedImageAnswerDetailsDTO(answerDTOs));
         }
 
         // GET: api/ImageAnswer/5
@@ -68,16 +70,16 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpGet("Submitted/{id}")]
         public async Task<ActionResult<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>> GetSubmitted(int id)
         {
-            SubmittedAnswerDTO<ImageAnswerDetailsDTO> answerDTO = await _submittedImageAnswerRepository.GetByID(id);
+            SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTO = await _submittedImageAnswerRepository.GetByID(id);
 
-            if (answerDTO == null)
+            if (submittedAnswerDTO == null)
             {
                 return NotFound();
             }
 
+            submittedAnswerDTO.Answer.AnswerDetails = await _imageAnswerRepository.GetByID(id);
 
-
-            return Ok(answerDTO);
+            return Ok(submittedAnswerDTO);
         }
 
         // POST: api/ImageAnswer
@@ -85,6 +87,10 @@ namespace CFBS.Feedback.API.REST.Controllers
         public async Task<ActionResult<AnswerDTO<ImageAnswerDetailsDTO>>> Post(AnswerDTO<ImageAnswerDetailsDTO> answerDTO)
         {
             AnswerDTO<ImageAnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
+
+            if (!answerDTOCreated.ID.HasValue) throw new InvalidOperationException();
+
+            answerDTO.AnswerDetails = await _imageAnswerRepository.GetByID(answerDTOCreated.ID.Value);
 
             return CreatedAtAction("Get", new { id = answerDTOCreated.ID }, answerDTOCreated);
         }
@@ -94,9 +100,13 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost("Submitted")]
         public async Task<ActionResult<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTO)
         {
-            submittedAnswerDTO = await _submittedImageAnswerRepository.Create(submittedAnswerDTO);
+            SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTOCreated = await _submittedImageAnswerRepository.Create(submittedAnswerDTO);
 
-            return CreatedAtAction("GetSubmitted", new { id = submittedAnswerDTO.ID }, submittedAnswerDTO);
+            if (!submittedAnswerDTOCreated.ID.HasValue) throw new InvalidOperationException();
+
+            submittedAnswerDTOCreated.Answer.AnswerDetails = await _imageAnswerRepository.GetByID(submittedAnswerDTOCreated.ID.Value);
+
+            return CreatedAtAction("GetSubmitted", new { id = submittedAnswerDTOCreated.ID }, submittedAnswerDTOCreated);
         }
 
         // PUT: api/ImageAnswer/5
@@ -114,6 +124,8 @@ namespace CFBS.Feedback.API.REST.Controllers
                 //TODO perhaps make it so this can only have an image ID
 
                 await _answerRepository.Update(id, answerDTO);
+
+                //TODO check if we need to call the other repo to update the details.
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -139,7 +151,11 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             try
             {
+                //TODO make sure to wipe values to stop duplicates.
+
                 await _submittedImageAnswerRepository.Update(id, submittedAnswerDTO);
+
+                //TODO check if we need to call the other repo to update the details.
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -165,6 +181,8 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             await _answerRepository.Delete(id);
 
+            //TODO check if anything needs to be done with the other repo.
+
             return NoContent();
         }
 
@@ -179,6 +197,8 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             await _submittedImageAnswerRepository.Delete(id);
 
+            //TODO check if anything needs to be done with the other repo.
+
             return NoContent();
         }
 
@@ -191,6 +211,17 @@ namespace CFBS.Feedback.API.REST.Controllers
             }
 
             return answerDTOs;
+        }
+
+        private async Task<IEnumerable<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>> SubmittedImageAnswerToSubmittedImageAnswerDetailsDTO(params SubmittedAnswerDTO<ImageAnswerDetailsDTO>[] submittedAnswerDTOs)
+        {
+            foreach (SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTO in submittedAnswerDTOs)
+            {
+                if (!submittedAnswerDTO.ID.HasValue) throw new InvalidOperationException();
+                submittedAnswerDTO.Answer.AnswerDetails = _mapper.Map<ImageAnswerDetailsDTO>(await _imageAnswerRepository.GetByID(submittedAnswerDTO.ID.Value));
+            }
+
+            return submittedAnswerDTOs;
         }
     }
 }
