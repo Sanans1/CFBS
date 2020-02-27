@@ -4,6 +4,5 @@
     {
         public int ImageID { get; set; }
         public ImageDTO Image { get; set; }
-        public object ImageFile { get; set; } //TODO change to something more relevant.
     }
 }

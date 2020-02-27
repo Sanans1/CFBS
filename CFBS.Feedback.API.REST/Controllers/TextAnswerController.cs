@@ -61,6 +61,8 @@ namespace CFBS.Feedback.API.REST.Controllers
                 return NotFound();
             }
 
+            answerDTO.AnswerDetails = await _textAnswerRepository.GetByID(id);
+
             return Ok(answerDTO);
         }
 
@@ -75,6 +77,8 @@ namespace CFBS.Feedback.API.REST.Controllers
                 return NotFound();
             }
 
+            submittedAnswerDTO.Answer.AnswerDetails = await _textAnswerRepository.GetByID(id);
+
             return Ok(submittedAnswerDTO);
         }
 
@@ -84,6 +88,10 @@ namespace CFBS.Feedback.API.REST.Controllers
         {
             AnswerDTO<AnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
 
+            if (!answerDTOCreated.ID.HasValue) throw new InvalidOperationException();
+
+            answerDTO.AnswerDetails = await _textAnswerRepository.GetByID(answerDTOCreated.ID.Value);
+
             return CreatedAtAction("Get", new { id = answerDTOCreated.ID }, answerDTOCreated);
         }
 
@@ -92,7 +100,11 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost("Submitted")]
         public async Task<ActionResult<SubmittedAnswerDTO<AnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO)
         {
-            submittedAnswerDTO = await _submittedTextAnswerRepository.Create(submittedAnswerDTO);
+            SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTOCreated = await _submittedTextAnswerRepository.Create(submittedAnswerDTO);
+
+            if (!submittedAnswerDTOCreated.ID.HasValue) throw new InvalidOperationException();
+
+            submittedAnswerDTOCreated.Answer.AnswerDetails = await _textAnswerRepository.GetByID(submittedAnswerDTOCreated.ID.Value);
 
             return CreatedAtAction("GetSubmitted", new { id = submittedAnswerDTO.ID }, submittedAnswerDTO);
         }
@@ -111,6 +123,8 @@ namespace CFBS.Feedback.API.REST.Controllers
                 //TODO Check for duplicate images
 
                 await _answerRepository.Update(id, answerDTO);
+
+                //TODO check if we need to call the other repo to update the details.
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -137,6 +151,8 @@ namespace CFBS.Feedback.API.REST.Controllers
             try
             {
                 await _submittedTextAnswerRepository.Update(id, submittedAnswerDTO);
+
+                //TODO check if we need to call the other repo to update the details.
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -162,6 +178,8 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             await _answerRepository.Delete(id);
 
+            //TODO check if anything needs to be done with the other repo.
+
             return NoContent();
         }
 
@@ -175,6 +193,8 @@ namespace CFBS.Feedback.API.REST.Controllers
             }
 
             await _submittedTextAnswerRepository.Delete(id);
+
+            //TODO check if anything needs to be done with the other repo.
 
             return NoContent();
         }
