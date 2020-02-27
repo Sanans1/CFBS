@@ -13,7 +13,7 @@ namespace CFBS.Feedback.DAL
         public DbSet<Answer> Answers { get; set; }
         public DbSet<TextAnswer> TextAnswers { get; set; }
         public DbSet<ImageAnswer> ImageAnswers { get; set; }
-        public DbSet<Image> Image { get; set; }
+        public DbSet<Image> Images { get; set; }
         public DbSet<SubmittedAnswer> SubmittedAnswers { get; set; }
         public DbSet<Location> Locations { get; set; }
 
@@ -93,7 +93,7 @@ namespace CFBS.Feedback.DAL
 
             modelBuilder.Entity<ImageAnswer>(imageAnswerEntities =>
             {
-                imageAnswerEntities.HasNoKey();
+                imageAnswerEntities.HasKey(imageAnswer => imageAnswer.AnswerID);
 
                 imageAnswerEntities.HasOne(imageAnswer => imageAnswer.Answer)
                                    .WithOne()
@@ -107,7 +107,7 @@ namespace CFBS.Feedback.DAL
 
             modelBuilder.Entity<TextAnswer>(textAnswerEntities =>
             {
-                textAnswerEntities.HasNoKey();
+                textAnswerEntities.HasKey(textAnswer => textAnswer.AnswerID);
 
                 textAnswerEntities.HasOne(textAnswer => textAnswer.Answer)
                     .WithOne()

@@ -80,7 +80,7 @@ namespace CFBS.Feedback.API.REST.Controllers
         }
 
         // POST: api/Image
-        [HttpPost]
+        [HttpPost("Active")]
         public async Task<ActionResult<ActiveQuestionDTO>> PostActive(ActiveQuestionDTO activeQuestionDTO)
         {
             ActiveQuestionDTO activeQuestionDTOCreated = await _activeQuestionRepository.Create(activeQuestionDTO);
@@ -115,7 +115,7 @@ namespace CFBS.Feedback.API.REST.Controllers
         }
 
         // PUT: api/Image/5
-        [HttpPut("{id}")]
+        [HttpPut("Active/{id}")]
         public async Task<IActionResult> PutActive(int locationID, int questionID, ActiveQuestionDTO activeQuestionDTO)
         {
             if (locationID != activeQuestionDTO.LocationID)
@@ -160,7 +160,7 @@ namespace CFBS.Feedback.API.REST.Controllers
         }
 
         // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
+        [HttpDelete("Active/{id}")]
         public async Task<IActionResult> DeleteActive(int locationID, int questionID)
         {
             if (!await _activeQuestionRepository.EntityExists(int.Parse($"{locationID}{questionID}")))

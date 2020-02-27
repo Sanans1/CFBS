@@ -24,7 +24,7 @@ namespace CFBS.Feedback.API.REST
                 {
                     try
                     {
-                       //TODO Add seeding method
+                        FeedbackDBInitialiser.SeedTestData(context, services);
                     }
                     catch (Exception)
                     {
