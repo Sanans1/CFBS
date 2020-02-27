@@ -39,8 +39,8 @@ namespace CFBS.Feedback.API.REST
             }
             else
             {
-                //services.AddDbContext<FeedbackContext>(options => options.UseLazyLoadingProxies()
-                //    .UseSqlServer(Configuration.GetConnectionString("ProductDatabase")));
+                services.AddDbContext<FeedbackContext>(options => options.UseLazyLoadingProxies()
+                    .UseSqlServer("Server=tcp:cfbs.database.windows.net,1433;Initial Catalog=cfbs;Persist Security Info=False;User ID=S6059168;Password=Sm258469713;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
             }
 
             services.AddScoped<ActiveQuestionRepository>();

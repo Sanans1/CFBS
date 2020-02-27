@@ -18,13 +18,15 @@ namespace CFBS.Feedback.API.REST.Controllers
     {
         private readonly IMapper _mapper;
         private readonly AnswerRepository<ImageAnswerDetailsDTO> _answerRepository;
+        private readonly ImageAnswerRepository _imageAnswerRepository;
         private readonly SubmittedImageAnswerRepository _submittedImageAnswerRepository;
 
         public ImageAnswerController(IMapper mapper, AnswerRepository<ImageAnswerDetailsDTO> answerRepository, 
-            SubmittedImageAnswerRepository submittedImageAnswerRepository)
+            ImageAnswerRepository imageAnswerRepository, SubmittedImageAnswerRepository submittedImageAnswerRepository)
         {
             _mapper = mapper;
             _answerRepository = answerRepository;
+            _imageAnswerRepository = imageAnswerRepository;
             _submittedImageAnswerRepository = submittedImageAnswerRepository;
         }
 
@@ -54,6 +56,8 @@ namespace CFBS.Feedback.API.REST.Controllers
                 return NotFound();
             }
 
+            answerDTO.AnswerDetails = await _imageAnswerRepository.GetByID(id);
+
             return Ok(answerDTO);
         }
 
@@ -67,6 +71,8 @@ namespace CFBS.Feedback.API.REST.Controllers
             {
                 return NotFound();
             }
+
+
 
             return Ok(answerDTO);
         }
