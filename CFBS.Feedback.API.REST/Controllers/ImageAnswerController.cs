@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using CFBS.Feedback.API.REST.Models;
 using CFBS.Feedback.API.REST.Services.Implementations;
+using CFBS.Feedback.DAL.Entities;
 using CFBS.Feedback.DAL.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,9 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AnswerDTO<ImageAnswerDetailsDTO>>>> Get()
         {
-            return Ok(await _answerRepository.Get(filter: answer => answer.AnswerType == AnswerType.Image));
+            AnswerDTO<ImageAnswerDetailsDTO>[] answerDTOs = (await _answerRepository.Get(filter: answer => answer.AnswerType == AnswerType.Image)).ToArray();
+
+            return Ok(await ImageAnswerToImageAnswerDetailsDTO(answerDTOs));
         }
 
         // GET: api/ImageAnswer/Submitted
@@ -177,6 +180,17 @@ namespace CFBS.Feedback.API.REST.Controllers
             await _submittedImageAnswerRepository.Delete(id);
 
             return NoContent();
+        }
+
+        private async Task<IEnumerable<AnswerDTO<ImageAnswerDetailsDTO>>> ImageAnswerToImageAnswerDetailsDTO(params AnswerDTO<ImageAnswerDetailsDTO>[] answerDTOs)
+        {
+            foreach (AnswerDTO<ImageAnswerDetailsDTO> answerDTO in answerDTOs)
+            {
+                if (!answerDTO.ID.HasValue) throw new InvalidOperationException();
+                answerDTO.AnswerDetails = _mapper.Map<ImageAnswerDetailsDTO>(await _imageAnswerRepository.GetByID(answerDTO.ID.Value));
+            }
+
+            return answerDTOs;
         }
     }
 }
