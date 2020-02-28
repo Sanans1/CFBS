@@ -21,14 +21,17 @@ namespace CFBS.Feedback.API.REST.Controllers
         private readonly AnswerRepository<ImageAnswerDetailsDTO> _answerRepository;
         private readonly ImageAnswerRepository _imageAnswerRepository;
         private readonly SubmittedImageAnswerRepository _submittedImageAnswerRepository;
+        private readonly LocationRepository _locationRepository;
 
         public ImageAnswerController(IMapper mapper, AnswerRepository<ImageAnswerDetailsDTO> answerRepository, 
-            ImageAnswerRepository imageAnswerRepository, SubmittedImageAnswerRepository submittedImageAnswerRepository)
+            ImageAnswerRepository imageAnswerRepository, SubmittedImageAnswerRepository submittedImageAnswerRepository,
+            LocationRepository locationRepository)
         {
             _mapper = mapper;
             _answerRepository = answerRepository;
             _imageAnswerRepository = imageAnswerRepository;
             _submittedImageAnswerRepository = submittedImageAnswerRepository;
+            _locationRepository = locationRepository;
         }
 
         // GET: api/ImageAnswer
@@ -44,7 +47,7 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpGet("Submitted")]
         public async Task<ActionResult<IEnumerable<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
         {
-            SubmittedAnswerDTO<ImageAnswerDetailsDTO>[] answerDTOs = (await _submittedImageAnswerRepository.Get(filter: submittedAnswer => (locationID.HasValue || submittedAnswer.LocationID == locationID) &&
+            SubmittedAnswerDTO<ImageAnswerDetailsDTO>[] answerDTOs = (await _submittedImageAnswerRepository.Get(filter: submittedAnswer => (!locationID.HasValue || submittedAnswer.LocationID == locationID) &&
                                                                                                                                            submittedAnswer.Answer.AnswerType == AnswerType.Image)).ToArray();
 
             return Ok(await SubmittedImageAnswerToSubmittedImageAnswerDetailsDTO(answerDTOs));
@@ -88,7 +91,6 @@ namespace CFBS.Feedback.API.REST.Controllers
         {
             answerDTO.ID = null;
             answerDTO.AnswerType = AnswerType.Image;
-            if (answerDTO.QuestionID == 0) throw new InvalidOperationException();
 
             AnswerDTO<ImageAnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
 
@@ -103,12 +105,25 @@ namespace CFBS.Feedback.API.REST.Controllers
             return CreatedAtAction("Get", new { id = answerDTOCreated.ID }, answerDTOCreated);
         }
 
-
+        /// <summary>
+        /// Will add a new ImageAnswer to the database.
+        /// </summary>
+        /// <param name="submittedAnswerDTO"></param>
+        /// <returns></returns>
         // POST: api/ImageAnswer/Submitted
         [HttpPost("Submitted")]
         public async Task<ActionResult<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTO)
         {
+            //Sets the DTO ID to null so the DB can set it
             submittedAnswerDTO.ID = null;
+
+            //Checks if the DTO has a location ID
+            if (!(await _locationRepository.EntityExists(submittedAnswerDTO.LocationID))) 
+                throw new InvalidOperationException();
+            //If the DTO has a location ID, we check if the location within it is null or has the same ID.
+            else if (submittedAnswerDTO.Location == null || submittedAnswerDTO.Location.ID.GetValueOrDefault() != submittedAnswerDTO.LocationID)
+                submittedAnswerDTO.Location = await _locationRepository.GetByID(submittedAnswerDTO.LocationID);
+
 
             SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTOCreated = await _submittedImageAnswerRepository.Create(submittedAnswerDTO);
 

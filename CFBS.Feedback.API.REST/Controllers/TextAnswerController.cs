@@ -44,7 +44,7 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpGet("Submitted")]
         public async Task<ActionResult<IEnumerable<SubmittedAnswerDTO<AnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
         {
-            SubmittedAnswerDTO<AnswerDetailsDTO>[] answerDTOs = (await _submittedTextAnswerRepository.Get(filter: submittedAnswer => (locationID.HasValue || submittedAnswer.LocationID == locationID) &&
+            SubmittedAnswerDTO<AnswerDetailsDTO>[] answerDTOs = (await _submittedTextAnswerRepository.Get(filter: submittedAnswer => (!locationID.HasValue || submittedAnswer.LocationID == locationID) &&
                                                                                                                                      submittedAnswer.Answer.AnswerType == AnswerType.Text)).ToArray();
 
             return Ok(await SubmittedTextAnswerToSubmittedTextAnswerDetailsDTO(answerDTOs));

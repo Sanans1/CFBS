@@ -100,9 +100,10 @@ namespace CFBS.Common.Repository
         public async Task<bool> EntityExists(int id)
         {
             TEntity entity = await _dbSet.FindAsync(id);
+            _context.Entry(entity).State = EntityState.Detached;
+
 
             return entity != null;
-            //_context.Entry(entity).State = EntityState.Detached;
         }
     }
 }
