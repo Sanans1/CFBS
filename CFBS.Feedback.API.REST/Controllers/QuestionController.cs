@@ -85,6 +85,9 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost("Active")]
         public async Task<ActionResult<ActiveQuestionDTO>> PostActive(ActiveQuestionDTO activeQuestionDTO)
         {
+            activeQuestionDTO.Question = null;
+            activeQuestionDTO.Location = null;
+
             ActiveQuestionDTO activeQuestionDTOCreated = await _activeQuestionRepository.Create(activeQuestionDTO);
 
             return CreatedAtAction("GetActive", new { id = int.Parse($"{activeQuestionDTOCreated.LocationID}{activeQuestionDTOCreated.QuestionID}") }, activeQuestionDTOCreated);

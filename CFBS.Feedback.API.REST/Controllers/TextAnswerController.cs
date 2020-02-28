@@ -87,6 +87,8 @@ namespace CFBS.Feedback.API.REST.Controllers
         public async Task<ActionResult<AnswerDTO<AnswerDetailsDTO>>> Post(AnswerDTO<AnswerDetailsDTO> answerDTO)
         {
             answerDTO.ID = null;
+            answerDTO.AnswerType = AnswerType.Text;
+            answerDTO.CreatedAt = DateTime.Now;
 
             AnswerDTO<AnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
 
@@ -103,6 +105,8 @@ namespace CFBS.Feedback.API.REST.Controllers
         public async Task<ActionResult<SubmittedAnswerDTO<AnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO)
         {
             submittedAnswerDTO.ID = null;
+            submittedAnswerDTO.Location = null;
+            submittedAnswerDTO.CreatedAt = DateTime.Now;
 
             SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTOCreated = await _submittedTextAnswerRepository.Create(submittedAnswerDTO);
 

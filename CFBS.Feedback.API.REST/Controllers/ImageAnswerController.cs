@@ -91,6 +91,7 @@ namespace CFBS.Feedback.API.REST.Controllers
         {
             answerDTO.ID = null;
             answerDTO.AnswerType = AnswerType.Image;
+            answerDTO.CreatedAt = DateTime.Now;
 
             AnswerDTO<ImageAnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
 
@@ -98,9 +99,7 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             answerDTO.AnswerDetails.AnswerID = answerDTOCreated.ID.Value;
 
-            ImageAnswerDetailsDTO imageAnswerDetailsDTOCreated = await _imageAnswerRepository.Create(answerDTO.AnswerDetails);
-
-            answerDTOCreated.AnswerDetails = imageAnswerDetailsDTOCreated;
+            answerDTOCreated.AnswerDetails = await _imageAnswerRepository.Create(answerDTO.AnswerDetails); ;
 
             return CreatedAtAction("Get", new { id = answerDTOCreated.ID }, answerDTOCreated);
         }
@@ -116,14 +115,9 @@ namespace CFBS.Feedback.API.REST.Controllers
         {
             //Sets the DTO ID to null so the DB can set it
             submittedAnswerDTO.ID = null;
-
-            //Checks if the DTO has a location ID
-            if (!(await _locationRepository.EntityExists(submittedAnswerDTO.LocationID))) 
-                throw new InvalidOperationException();
-            //If the DTO has a location ID, we check if the location within it is null or has the same ID.
-            else if (submittedAnswerDTO.Location == null || submittedAnswerDTO.Location.ID.GetValueOrDefault() != submittedAnswerDTO.LocationID)
-                submittedAnswerDTO.Location = await _locationRepository.GetByID(submittedAnswerDTO.LocationID);
-
+            submittedAnswerDTO.Location = null;
+            submittedAnswerDTO.Answer = null;
+            submittedAnswerDTO.CreatedAt = DateTime.Now;
 
             SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTOCreated = await _submittedImageAnswerRepository.Create(submittedAnswerDTO);
 
