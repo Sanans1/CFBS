@@ -86,6 +86,8 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost]
         public async Task<ActionResult<AnswerDTO<AnswerDetailsDTO>>> Post(AnswerDTO<AnswerDetailsDTO> answerDTO)
         {
+            answerDTO.ID = null;
+
             AnswerDTO<AnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
 
             if (!answerDTOCreated.ID.HasValue) throw new InvalidOperationException();
@@ -100,6 +102,8 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost("Submitted")]
         public async Task<ActionResult<SubmittedAnswerDTO<AnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO)
         {
+            submittedAnswerDTO.ID = null;
+
             SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTOCreated = await _submittedTextAnswerRepository.Create(submittedAnswerDTO);
 
             if (!submittedAnswerDTOCreated.ID.HasValue) throw new InvalidOperationException();

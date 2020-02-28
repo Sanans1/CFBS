@@ -49,6 +49,8 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost]
         public async Task<ActionResult<LocationDTO>> Post(LocationDTO locationDTO)
         {
+            locationDTO.ID = null;
+
             LocationDTO locationCreated = await _locationRepository.Create(locationDTO);
 
             return CreatedAtAction("Get", new { id = locationCreated.ID }, locationCreated);

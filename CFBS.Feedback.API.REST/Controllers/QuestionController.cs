@@ -74,6 +74,8 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost]
         public async Task<ActionResult<QuestionDTO>> Post(QuestionDTO questionDTO)
         {
+            questionDTO.ID = null;
+
             QuestionDTO questionDTOCreated = await _questionRepository.Create(questionDTO);
 
             return CreatedAtAction("Get", new { id = questionDTOCreated.ID }, questionDTOCreated);

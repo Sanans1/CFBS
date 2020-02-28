@@ -49,6 +49,9 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost]
         public async Task<ActionResult<ImageDTO>> Post(ImageDTO imageDTO)
         {
+            imageDTO.ID = null;
+            imageDTO.CreatedAt = DateTime.Now;
+
             ImageDTO imageDTOCreated = await _imageRepository.Create(imageDTO);
 
             return CreatedAtAction("Get", new { id = imageDTOCreated.ID }, imageDTOCreated);

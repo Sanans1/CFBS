@@ -86,11 +86,19 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost]
         public async Task<ActionResult<AnswerDTO<ImageAnswerDetailsDTO>>> Post(AnswerDTO<ImageAnswerDetailsDTO> answerDTO)
         {
+            answerDTO.ID = null;
+            answerDTO.AnswerType = AnswerType.Image;
+            if (answerDTO.QuestionID == 0) throw new InvalidOperationException();
+
             AnswerDTO<ImageAnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
 
             if (!answerDTOCreated.ID.HasValue) throw new InvalidOperationException();
 
-            answerDTO.AnswerDetails = await _imageAnswerRepository.GetByID(answerDTOCreated.ID.Value);
+            answerDTO.AnswerDetails.AnswerID = answerDTOCreated.ID.Value;
+
+            ImageAnswerDetailsDTO imageAnswerDetailsDTOCreated = await _imageAnswerRepository.Create(answerDTO.AnswerDetails);
+
+            answerDTOCreated.AnswerDetails = imageAnswerDetailsDTOCreated;
 
             return CreatedAtAction("Get", new { id = answerDTOCreated.ID }, answerDTOCreated);
         }
@@ -100,6 +108,8 @@ namespace CFBS.Feedback.API.REST.Controllers
         [HttpPost("Submitted")]
         public async Task<ActionResult<SubmittedAnswerDTO<ImageAnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTO)
         {
+            submittedAnswerDTO.ID = null;
+
             SubmittedAnswerDTO<ImageAnswerDetailsDTO> submittedAnswerDTOCreated = await _submittedImageAnswerRepository.Create(submittedAnswerDTO);
 
             if (!submittedAnswerDTOCreated.ID.HasValue) throw new InvalidOperationException();
