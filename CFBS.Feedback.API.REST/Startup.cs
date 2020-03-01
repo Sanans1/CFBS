@@ -41,7 +41,7 @@ namespace CFBS.Feedback.API.REST
             else
             {
                 services.AddDbContext<FeedbackContext>(options => options.UseLazyLoadingProxies()
-                    .UseSqlServer(Configuration.GetConnectionString("ProductDatabase")));
+                    .UseSqlServer(Configuration.GetConnectionString("FeedbackDatabase")));
             }
 
             services.AddScoped<ActiveQuestionRepository>();
