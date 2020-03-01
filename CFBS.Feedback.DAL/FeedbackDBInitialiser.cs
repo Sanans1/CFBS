@@ -170,25 +170,29 @@ namespace CFBS.Feedback.DAL
                 {
                     AnswerID = 1,
                     ImageID = 1,
-                    Text = "Happy"
+                    Text = "Happy",
+                    IsActive = true
                 },
                 new ImageAnswer
                 {
                     AnswerID = 2,
                     ImageID = 2,
-                    Text = "Sad"
+                    Text = "Sad",
+                    IsActive = true
                 },
                 new ImageAnswer
                 {
                     AnswerID = 4,
                     ImageID = 1,
-                    Text = "Happy"
+                    Text = "Happy",
+                    IsActive = true
                 },
                 new ImageAnswer
                 {
                     AnswerID = 5,
-                    ImageID = 1,
-                    Text = "Sad"
+                    ImageID = 2,
+                    Text = "Sad",
+                    IsActive = true
                 },
             };
 

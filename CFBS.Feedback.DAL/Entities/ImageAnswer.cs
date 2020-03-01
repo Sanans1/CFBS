@@ -9,6 +9,7 @@ namespace CFBS.Feedback.DAL.Entities
         public int AnswerID { get; set; }
         public int ImageID { get; set; }
         public string Text { get; set; }
+        public bool IsActive { get; set; }
 
         public virtual Answer Answer { get; set; }
         public virtual Image Image { get; set; }

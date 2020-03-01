@@ -8,6 +8,7 @@ namespace CFBS.Feedback.API.REST.Models
 {
     public class ActiveQuestionDTO
     {
+        public int? ID { get; set; }
         public int QuestionID { get; set; }
         public int LocationID { get; set; }
 

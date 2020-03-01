@@ -54,47 +54,7 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             ImageDTO imageDTOCreated = await _imageRepository.Create(imageDTO);
 
-            return CreatedAtAction("Get", new { id = imageDTOCreated.ID }, imageDTOCreated);
-        }
-
-        // PUT: api/Image/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, ImageDTO imageDTO)
-        {
-            if (id != imageDTO.ID)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                await _imageRepository.Update(id, imageDTO);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _imageRepository.EntityExists(id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (!await _imageRepository.EntityExists(id))
-            {
-                return NotFound();
-            }
-
-            await _imageRepository.Delete(id);
-
-            return NoContent();
+            return CreatedAtAction("Get", new {id = imageDTOCreated.ID}, imageDTOCreated);
         }
     }
 }

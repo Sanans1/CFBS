@@ -18,28 +18,24 @@ namespace CFBS.Feedback.API.REST.Controllers
         private readonly IMapper _mapper;
         private readonly QuestionRepository _questionRepository;
         private readonly ActiveQuestionRepository _activeQuestionRepository;
+        private readonly ImageAnswerRepository _imageAnswerRepository;
 
         public QuestionController(IMapper mapper, QuestionRepository questionRepository, 
-            ActiveQuestionRepository activeQuestionRepository)
+            ActiveQuestionRepository activeQuestionRepository, ImageAnswerRepository imageAnswerRepository)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
             _activeQuestionRepository = activeQuestionRepository;
+            _imageAnswerRepository = imageAnswerRepository;
         }
+
+        #region Questions
 
         // GET: api/Image
         [HttpGet]
         public async Task<ActionResult<IEnumerable<QuestionDTO>>> Get()
         {
             return Ok(await _questionRepository.Get());
-        }
-
-        // GET: api/Image
-        [HttpGet("Active")]
-        public async Task<ActionResult<IEnumerable<ActiveQuestionDTO>>> GetActive(int? locationID = null, string locationName = null)
-        {
-            return Ok(await _activeQuestionRepository.Get(filter: activeQuestion => (locationID.HasValue || activeQuestion.LocationID == locationID) && 
-                                                                                    (string.IsNullOrWhiteSpace(locationName) || activeQuestion.Location.Name == locationName)));
         }
 
         // GET: api/Image/5
@@ -56,20 +52,6 @@ namespace CFBS.Feedback.API.REST.Controllers
             return Ok(questionDTO);
         }
 
-        // GET: api/Image/5
-        [HttpGet("Active/{id}")]
-        public async Task<ActionResult<ActiveQuestionDTO>> GetActive(int locationID, int questionID)
-        {
-            ActiveQuestionDTO activeQuestionDTO = await _activeQuestionRepository.GetByID(int.Parse($"{locationID}{questionID}"));
-
-            if (activeQuestionDTO == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(activeQuestionDTO);
-        }
-
         // POST: api/Image
         [HttpPost]
         public async Task<ActionResult<QuestionDTO>> Post(QuestionDTO questionDTO)
@@ -81,101 +63,58 @@ namespace CFBS.Feedback.API.REST.Controllers
             return CreatedAtAction("Get", new { id = questionDTOCreated.ID }, questionDTOCreated);
         }
 
+        #endregion
+
+        #region ActiveQuestions
+
+        // GET: api/Image
+        [HttpGet("Active")]
+        public async Task<ActionResult<IEnumerable<ActiveQuestionDTO>>> GetActive(int? locationID = null)
+        {
+            return Ok(await _activeQuestionRepository.Get(filter: activeQuestion => !locationID.HasValue || activeQuestion.LocationID == locationID));
+        }
+
+        // GET: api/Image/5
+        [HttpGet("Active/{id}")]
+        public async Task<ActionResult<ActiveQuestionDTO>> GetActive(int id)
+        {
+            ActiveQuestionDTO activeQuestionDTO = await _activeQuestionRepository.GetByID(id);
+
+            if (activeQuestionDTO == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(activeQuestionDTO);
+        }
+
         // POST: api/Image
         [HttpPost("Active")]
         public async Task<ActionResult<ActiveQuestionDTO>> PostActive(ActiveQuestionDTO activeQuestionDTO)
         {
+            activeQuestionDTO.ID = null;
             activeQuestionDTO.Question = null;
             activeQuestionDTO.Location = null;
 
             ActiveQuestionDTO activeQuestionDTOCreated = await _activeQuestionRepository.Create(activeQuestionDTO);
 
-            return CreatedAtAction("GetActive", new { id = int.Parse($"{activeQuestionDTOCreated.LocationID}{activeQuestionDTOCreated.QuestionID}") }, activeQuestionDTOCreated);
-        }
-
-        // PUT: api/Image/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, QuestionDTO questionDTO)
-        {
-            if (id != questionDTO.ID)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                await _questionRepository.Update(id, questionDTO);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _questionRepository.EntityExists(id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // PUT: api/Image/5
-        [HttpPut("Active/{id}")]
-        public async Task<IActionResult> PutActive(int locationID, int questionID, ActiveQuestionDTO activeQuestionDTO)
-        {
-            if (locationID != activeQuestionDTO.LocationID)
-            {
-                return BadRequest();
-            }
-
-            if (questionID != activeQuestionDTO.QuestionID)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                await _activeQuestionRepository.Update(int.Parse($"{locationID}{questionID}"), activeQuestionDTO);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _activeQuestionRepository.EntityExists(int.Parse($"{locationID}{questionID}")))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (!await _questionRepository.EntityExists(id))
-            {
-                return NotFound();
-            }
-
-            await _questionRepository.Delete(id);
-
-            return NoContent();
+            return CreatedAtAction("GetActive", new { id = activeQuestionDTOCreated.ID }, activeQuestionDTOCreated);
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("Active/{id}")]
-        public async Task<IActionResult> DeleteActive(int locationID, int questionID)
+        public async Task<IActionResult> DeleteActive(int id)
         {
-            if (!await _activeQuestionRepository.EntityExists(int.Parse($"{locationID}{questionID}")))
+            if (!await _activeQuestionRepository.EntityExists(id))
             {
                 return NotFound();
             }
 
-            await _activeQuestionRepository.Delete(int.Parse($"{locationID}{questionID}"));
+            await _activeQuestionRepository.Delete(id);
 
             return NoContent();
         }
+
+        #endregion
     }
 }

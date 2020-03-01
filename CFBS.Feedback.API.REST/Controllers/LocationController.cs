@@ -55,45 +55,5 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             return CreatedAtAction("Get", new { id = locationCreated.ID }, locationCreated);
         }
-
-        // PUT: api/Image/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, LocationDTO locationDTO)
-        {
-            if (id != locationDTO.ID)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                await _locationRepository.Update(id, locationDTO);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _locationRepository.EntityExists(id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (!await _locationRepository.EntityExists(id))
-            {
-                return NotFound();
-            }
-
-            await _locationRepository.Delete(id);
-
-            return NoContent();
-        }
     }
 }

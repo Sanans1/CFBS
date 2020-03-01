@@ -58,7 +58,8 @@ namespace CFBS.Feedback.DAL
 
             modelBuilder.Entity<ActiveQuestion>(activeQuestionEntities =>
             {
-                activeQuestionEntities.HasKey(activeQuestion => new { activeQuestion.LocationID, activeQuestion.QuestionID });
+                activeQuestionEntities.HasKey(activeQuestion => activeQuestion.ID);
+                activeQuestionEntities.Property(activeQuestion => activeQuestion.ID).ValueGeneratedOnAdd();
 
                 activeQuestionEntities.HasOne(activeQuestion => activeQuestion.Question)
                                       .WithMany()

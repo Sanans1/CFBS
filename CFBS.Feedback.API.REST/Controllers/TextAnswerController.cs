@@ -29,25 +29,24 @@ namespace CFBS.Feedback.API.REST.Controllers
             _textAnswerRepository = textAnswerRepository;
             _submittedTextAnswerRepository = submittedTextAnswerRepository;
         }
+        
+        #region TextAnswers
 
-        //TODO does this act different to the image one?
         // GET: api/TextAnswer
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AnswerDTO<AnswerDetailsDTO>>>> Get()
+        public async Task<ActionResult<IEnumerable<AnswerDTO<AnswerDetailsDTO>>>> Get(int? questionID = null)
         {
-            AnswerDTO<AnswerDetailsDTO>[] answerDTOs = (await _answerRepository.Get(filter: answer => answer.AnswerType == AnswerType.Text)).ToArray();
+            AnswerDTO<AnswerDetailsDTO>[] answerDTOs = (await _answerRepository.Get(filter: answer => answer.AnswerType == AnswerType.Text &&
+                                                                                                      (!questionID.HasValue || questionID.Value == answer.QuestionID)))
+                                                                                                      .ToArray();
 
-            return Ok(await TextAnswerToTextAnswerDetailsDTO(answerDTOs));
-        }
+            foreach (AnswerDTO<AnswerDetailsDTO> answerDTO in answerDTOs)
+            {
+                if (!answerDTO.ID.HasValue) throw new InvalidOperationException();
+                answerDTO.AnswerDetails = _mapper.Map<AnswerDetailsDTO>(await _textAnswerRepository.GetByID(answerDTO.ID.Value));
+            }
 
-        // GET: api/TextAnswer/Submitted
-        [HttpGet("Submitted")]
-        public async Task<ActionResult<IEnumerable<SubmittedAnswerDTO<AnswerDetailsDTO>>>> GetSubmitted(int? locationID = null)
-        {
-            SubmittedAnswerDTO<AnswerDetailsDTO>[] answerDTOs = (await _submittedTextAnswerRepository.Get(filter: submittedAnswer => (!locationID.HasValue || submittedAnswer.LocationID == locationID) &&
-                                                                                                                                     submittedAnswer.Answer.AnswerType == AnswerType.Text)).ToArray();
-
-            return Ok(await SubmittedTextAnswerToSubmittedTextAnswerDetailsDTO(answerDTOs));
+            return Ok(answerDTOs);
         }
 
         // GET: api/TextAnswer/5
@@ -66,6 +65,27 @@ namespace CFBS.Feedback.API.REST.Controllers
             return Ok(answerDTO);
         }
 
+        #endregion
+
+        #region SubmittedTextAnswers
+
+        // GET: api/TextAnswer/Submitted
+        [HttpGet("Submitted")]
+        public async Task<ActionResult<IEnumerable<SubmittedAnswerDTO<AnswerDetailsDTO>>>> GetSubmitted(int? locationID = null, int? questionID = null, bool? isActive = null)
+        {
+            SubmittedAnswerDTO<AnswerDetailsDTO>[] submittedAnswerDTOs = (await _submittedTextAnswerRepository.Get(filter: submittedAnswer => submittedAnswer.Answer.AnswerType == AnswerType.Text &&
+                                                                                                                                              (!locationID.HasValue || submittedAnswer.LocationID == locationID) &&
+                                                                                                                                              (!questionID.HasValue || submittedAnswer.Answer.QuestionID == questionID.Value))).ToArray();
+
+            foreach (SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO in submittedAnswerDTOs)
+            {
+                if (!submittedAnswerDTO.ID.HasValue) throw new InvalidOperationException();
+                submittedAnswerDTO.Answer.AnswerDetails = _mapper.Map<AnswerDetailsDTO>(await _textAnswerRepository.GetByID(submittedAnswerDTO.ID.Value));
+            }
+
+            return Ok(submittedAnswerDTOs);
+        }
+
         // GET: api/TextAnswer/Submitted/5
         [HttpGet("Submitted/{id}")]
         public async Task<ActionResult<SubmittedAnswerDTO<AnswerDetailsDTO>>> GetSubmitted(int id)
@@ -82,24 +102,11 @@ namespace CFBS.Feedback.API.REST.Controllers
             return Ok(submittedAnswerDTO);
         }
 
-        // POST: api/TextAnswer
-        [HttpPost]
-        public async Task<ActionResult<AnswerDTO<AnswerDetailsDTO>>> Post(AnswerDTO<AnswerDetailsDTO> answerDTO)
-        {
-            answerDTO.ID = null;
-            answerDTO.AnswerType = AnswerType.Text;
-            answerDTO.CreatedAt = DateTime.Now;
-
-            AnswerDTO<AnswerDetailsDTO> answerDTOCreated = await _answerRepository.Create(answerDTO);
-
-            if (!answerDTOCreated.ID.HasValue) throw new InvalidOperationException();
-
-            answerDTO.AnswerDetails = await _textAnswerRepository.GetByID(answerDTOCreated.ID.Value);
-
-            return CreatedAtAction("Get", new { id = answerDTOCreated.ID }, answerDTOCreated);
-        }
-
-
+        /// <summary>
+        /// Can be used to submit text answers.
+        /// </summary>
+        /// <param name="submittedAnswerDTO"></param>
+        /// <returns></returns>
         // POST: api/TextAnswer/Submitted
         [HttpPost("Submitted")]
         public async Task<ActionResult<SubmittedAnswerDTO<AnswerDetailsDTO>>> PostSubmitted(SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO)
@@ -112,121 +119,13 @@ namespace CFBS.Feedback.API.REST.Controllers
 
             if (!submittedAnswerDTOCreated.ID.HasValue) throw new InvalidOperationException();
 
-            submittedAnswerDTOCreated.Answer.AnswerDetails = await _textAnswerRepository.GetByID(submittedAnswerDTOCreated.ID.Value);
+            submittedAnswerDTOCreated.Answer.AnswerDetails.AnswerID = submittedAnswerDTOCreated.AnswerID;
+
+            submittedAnswerDTOCreated.Answer.AnswerDetails = await _textAnswerRepository.Create(submittedAnswerDTOCreated.Answer.AnswerDetails);
 
             return CreatedAtAction("GetSubmitted", new { id = submittedAnswerDTO.ID }, submittedAnswerDTO);
         }
 
-        // PUT: api/TextAnswer/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, AnswerDTO<AnswerDetailsDTO> answerDTO)
-        {
-            if (id != answerDTO.ID)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                //TODO Check for duplicate images
-
-                await _answerRepository.Update(id, answerDTO);
-
-                //TODO check if we need to call the other repo to update the details.
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _answerRepository.EntityExists(id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // PUT: api/TextAnswer/Submitted/5
-        [HttpPut("Submitted/{id}")]
-        public async Task<IActionResult> PutSubmitted(int id, SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO)
-        {
-            if (id != submittedAnswerDTO.ID)
-            {
-                return BadRequest();
-            }
-
-            try
-            {
-                await _submittedTextAnswerRepository.Update(id, submittedAnswerDTO);
-
-                //TODO check if we need to call the other repo to update the details.
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _submittedTextAnswerRepository.EntityExists(id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/TextAnswer/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (!await _answerRepository.EntityExists(id))
-            {
-                return NotFound();
-            }
-
-            await _answerRepository.Delete(id);
-
-            //TODO check if anything needs to be done with the other repo.
-
-            return NoContent();
-        }
-
-        // DELETE: api/TextAnswer/Submitted/5
-        [HttpDelete("Submitted/{id}")]
-        public async Task<IActionResult> DeleteSubmitted(int id)
-        {
-            if (!await _submittedTextAnswerRepository.EntityExists(id))
-            {
-                return NotFound();
-            }
-
-            await _submittedTextAnswerRepository.Delete(id);
-
-            //TODO check if anything needs to be done with the other repo.
-
-            return NoContent();
-        }
-
-        private async Task<IEnumerable<AnswerDTO<AnswerDetailsDTO>>> TextAnswerToTextAnswerDetailsDTO(params AnswerDTO<AnswerDetailsDTO>[] answerDTOs)
-        {
-            foreach (AnswerDTO<AnswerDetailsDTO> answerDTO in answerDTOs)
-            {
-                if (!answerDTO.ID.HasValue) throw new InvalidOperationException();
-                answerDTO.AnswerDetails = _mapper.Map<AnswerDetailsDTO>(await _textAnswerRepository.GetByID(answerDTO.ID.Value));
-            }
-
-            return answerDTOs;
-        }
-
-        private async Task<IEnumerable<SubmittedAnswerDTO<AnswerDetailsDTO>>> SubmittedTextAnswerToSubmittedTextAnswerDetailsDTO(params SubmittedAnswerDTO<AnswerDetailsDTO>[] submittedAnswerDTOs)
-        {
-            foreach (SubmittedAnswerDTO<AnswerDetailsDTO> submittedAnswerDTO in submittedAnswerDTOs)
-            {
-                if (!submittedAnswerDTO.ID.HasValue) throw new InvalidOperationException();
-                submittedAnswerDTO.Answer.AnswerDetails = _mapper.Map<AnswerDetailsDTO>(await _textAnswerRepository.GetByID(submittedAnswerDTO.ID.Value));
-            }
-
-            return submittedAnswerDTOs;
-        }
+        #endregion
     }
 }
