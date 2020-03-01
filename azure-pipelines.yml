@@ -34,14 +34,14 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: CopyFiles@2
-  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+  displayName: 'Copy Files to: $(artifactstagingdirectory)'
   inputs:
-    SourceFolder: '$(system.defaultworkingdirectory)'
+    SourceFolder: '$(defaultworkingdirectory)'
     Contents: |
      **\bin\$(BuildConfiguration)\**
      **\$(BuildConfiguration)\*test*.dll
      !**\obj\**
-    TargetFolder: '$(build.artifactstagingdirectory)'
+    TargetFolder: '$(artifactstagingdirectory)'
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols path'
@@ -53,7 +53,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
   inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-    ArtifactName: '$(Parameters.ArtifactName)'
+    PathtoPublish: '$(artifactstagingdirectory)'
+    ArtifactName: '$(ArtifactName)'
   condition: succeededOrFailed()
 
