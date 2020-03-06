@@ -29,43 +29,6 @@ namespace CFBS.Feedback.API.REST.Controllers
             _textAnswerRepository = textAnswerRepository;
             _submittedTextAnswerRepository = submittedTextAnswerRepository;
         }
-        
-        #region TextAnswers
-
-        // GET: api/TextAnswer
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<AnswerDTO<AnswerDetailsDTO>>>> Get(int? questionID = null)
-        {
-            AnswerDTO<AnswerDetailsDTO>[] answerDTOs = (await _answerRepository.Get(filter: answer => answer.AnswerType == AnswerType.Text &&
-                                                                                                      (!questionID.HasValue || questionID.Value == answer.QuestionID)))
-                                                                                                      .ToArray();
-
-            foreach (AnswerDTO<AnswerDetailsDTO> answerDTO in answerDTOs)
-            {
-                if (!answerDTO.ID.HasValue) throw new InvalidOperationException();
-                answerDTO.AnswerDetails = _mapper.Map<AnswerDetailsDTO>(await _textAnswerRepository.GetByID(answerDTO.ID.Value));
-            }
-
-            return Ok(answerDTOs);
-        }
-
-        // GET: api/TextAnswer/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<AnswerDTO<AnswerDetailsDTO>>> Get(int id)
-        {
-            AnswerDTO<AnswerDetailsDTO> answerDTO = await _answerRepository.GetByID(id);
-
-            if (answerDTO == null)
-            {
-                return NotFound();
-            }
-
-            answerDTO.AnswerDetails = await _textAnswerRepository.GetByID(id);
-
-            return Ok(answerDTO);
-        }
-
-        #endregion
 
         #region SubmittedTextAnswers
 
